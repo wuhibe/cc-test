@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { LlmHandlerService } from '../llm-handler/llm-handler.service';
 import { POSITIVE_SMILEYS, SMILEY_RESPONSES } from './constants';
 import { AddExampleDto } from './dto/add-example.dto';
 import { ProposeReplyDto } from './dto/propose-reply.dto';
 
 @Injectable()
 export class CommentReplyService {
+  constructor(private readonly llmHandlerService: LlmHandlerService) {}
+
   addExample(addExampleDto: AddExampleDto) {
     return addExampleDto;
   }
@@ -35,7 +38,7 @@ export class CommentReplyService {
       }
     } else {
       // TODO: Implement the logic for complex comments
-      const response = `${comment_text}`;
+      const response = this.llmHandlerService.chatCompletion(comment_text);
       return {
         proposed_response: response,
       };
