@@ -38,7 +38,8 @@ export class CommentReplyService {
       }
     } else {
       // TODO: Implement the logic for complex comments
-      const response = this.llmHandlerService.chatCompletion(comment_text);
+      const response =
+        await this.llmHandlerService.chatCompletion(comment_text);
       return {
         proposed_response: response,
       };
