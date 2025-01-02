@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class ProposeReplyDto {
@@ -8,6 +9,7 @@ export class ProposeReplyDto {
   })
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => value.trim())
   username: string;
 
   @ApiProperty({
@@ -16,5 +18,6 @@ export class ProposeReplyDto {
   })
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => value.trim())
   comment_text: string;
 }

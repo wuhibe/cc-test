@@ -15,7 +15,7 @@ export class CommentReplyController {
 
   @ApiOperation({ summary: 'Add an example comment and reply' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Example comment and reply added',
     example: addExampleResponse,
   })
@@ -26,7 +26,7 @@ export class CommentReplyController {
 
   @ApiOperation({ summary: 'Propose a reply to a comment' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Reply proposed',
     example: proposeReplyResponse,
   })

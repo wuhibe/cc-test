@@ -1,3 +1,4 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import {
   DocumentBuilder,
@@ -8,7 +9,17 @@ import {
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  const port = process.env.PORT || 3000;
+
   const app = await NestFactory.create(AppModule);
+
+  // Global validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
   // Swagger setup
   const config = new DocumentBuilder()
@@ -25,6 +36,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config, options);
   SwaggerModule.setup('api', app, document, customOptions);
 
-  await app.listen(3000);
+  await app.listen(port);
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();
