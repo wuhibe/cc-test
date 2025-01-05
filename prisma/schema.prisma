@@ -8,10 +8,10 @@ datasource db {
 }
 
 model ReplyExamples {
-    id              String @id @default(cuid())
+    id              String  @id @default(cuid())
     username        String
     comment         String
-    embedding       String
+    embedding       Float[]
     character_count Int
     reply           String
 
