@@ -27,6 +27,26 @@ export class LlmHandlerService {
       modelName: LLM_MODEL,
     });
     this.embeddings = new OpenAIEmbeddings();
+    this.loadReplyExamples().then(() => {
+      console.log('Reply examples loaded');
+    });
+  }
+
+  async loadReplyExamples() {
+    this.longReplyExamples = await this.prismaService.replyExample.findMany({
+      where: {
+        character_count: {
+          gte: 25,
+        },
+      },
+    });
+    this.shortReplyExamples = await this.prismaService.replyExample.findMany({
+      where: {
+        character_count: {
+          lt: 25,
+        },
+      },
+    });
   }
 
   async addReplyExample(
@@ -137,8 +157,6 @@ export class LlmHandlerService {
       ...(await fewShotPrompt.formatMessages({})),
       ['human', '{input}'],
     ]);
-    const promptTemplate = await finalPrompt.format({ input: message });
-    console.log({ promptTemplate });
 
     const parser = new StringOutputParser();
     const chain = finalPrompt.pipe(this.llm).pipe(parser);
