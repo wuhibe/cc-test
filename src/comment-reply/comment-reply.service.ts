@@ -23,7 +23,7 @@ export class CommentReplyService {
     const smileyRegex = new RegExp(`^[${POSITIVE_SMILEYS.join('')}\\s]+$`);
     const onlySmileys = smileyRegex.test(comment_text);
     const mentionSmileysRegex = new RegExp(
-      `^@[\\w\\._\\d]+(?:\\s+@[\\w\\._\\d]+)*(?:\\s+[${POSITIVE_SMILEYS.join('')}\\s]+)*$`,
+      `^@[\\w\\._\\d]+(?:\\s+@[\\w\\._\\d]+)*(?:\\s*[${POSITIVE_SMILEYS.join('')}\\s]+)*$`,
     );
     const onlyMentionSmileys = mentionSmileysRegex.test(comment_text);
 

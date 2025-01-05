@@ -100,16 +100,12 @@ The project uses a PostgreSQL database with the following main table:
    - Add rate limiting for API endpoints
    - Implement request throttling
 
-3. **Caching**
-   - Add Redis caching for frequently accessed data
-   - Implement response caching
-
-4. **Monitoring & Logging**
+3. **Monitoring & Logging**
    - Set up application monitoring
    - Implement structured logging
    - Add error tracking
 
-5. **Testing**
+4. **Testing**
    - Increase test coverage
    - Add integration tests
    - Implement load testing
