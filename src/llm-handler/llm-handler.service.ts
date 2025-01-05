@@ -7,7 +7,12 @@ import {
 import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { PROMPT_TEMPLATE } from 'src/utils/constants';
+import {
+  DB_TAKE_LIMIT,
+  LLM_MODEL,
+  PROMPT_TEMPLATE,
+  VECTOR_STORE_SIMILARITY_LIMIT,
+} from 'src/utils/constants';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -17,7 +22,7 @@ export class LlmHandlerService {
 
   constructor(private readonly prismaService: PrismaService) {
     this.llm = new ChatOpenAI({
-      modelName: 'gpt-4o',
+      modelName: LLM_MODEL,
     });
     this.embeddings = new OpenAIEmbeddings();
   }
@@ -57,7 +62,7 @@ export class LlmHandlerService {
                 lt: 25,
               },
       },
-      take: 100,
+      take: DB_TAKE_LIMIT,
     });
     await vectorStore.addVectors(
       examples.map((example) => example.embedding),
@@ -85,7 +90,10 @@ export class LlmHandlerService {
     const vectorStore = await this.initializeVectorStore(comment);
 
     const examples = [];
-    const documents = await vectorStore.similaritySearch(comment, 5);
+    const documents = await vectorStore.similaritySearch(
+      comment,
+      VECTOR_STORE_SIMILARITY_LIMIT,
+    );
     documents.forEach((doc) => {
       const { username, comment, reply } = doc.metadata;
       examples.push({ input: `@${username}: ${comment}`, output: reply });
