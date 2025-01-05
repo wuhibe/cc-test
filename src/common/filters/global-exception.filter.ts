@@ -19,15 +19,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message =
+    const message = exception?.['response']?.['message'];
+    const error =
       exception instanceof HttpException
         ? exception.message
         : 'Internal server error';
 
     const errorResponse = {
-      statusCode: status,
       path: request.url,
-      message: message,
+      statusCode: status,
+      error,
+      message,
     };
 
     response.status(status).json(errorResponse);
