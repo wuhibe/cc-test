@@ -6,9 +6,9 @@ import {
 } from '@langchain/core/prompts';
 import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
+import { ReplyExample } from '@prisma/client';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import {
-  DB_TAKE_LIMIT,
   LLM_MODEL,
   PROMPT_TEMPLATE,
   VECTOR_STORE_SIMILARITY_LIMIT,
@@ -19,6 +19,8 @@ import { PrismaService } from '../prisma/prisma.service';
 export class LlmHandlerService {
   private llm: ChatOpenAI;
   private embeddings: OpenAIEmbeddings;
+  private longReplyExamples: ReplyExample[];
+  private shortReplyExamples: ReplyExample[];
 
   constructor(private readonly prismaService: PrismaService) {
     this.llm = new ChatOpenAI({
@@ -33,7 +35,7 @@ export class LlmHandlerService {
     reply: string,
   ): Promise<{ id: string; character_count: number }> {
     const embedding = await this.embeddings.embedQuery(comment);
-    const res = await this.prismaService.replyExamples.create({
+    const res = await this.prismaService.replyExample.create({
       data: {
         username,
         comment,
@@ -41,29 +43,51 @@ export class LlmHandlerService {
         character_count: comment.length,
         reply,
       },
-      select: {
-        id: true,
-        character_count: true,
-      },
     });
-    return res;
+    const commentLength = comment.length >= 25 ? 'long' : 'short';
+    if (commentLength === 'long') {
+      this.longReplyExamples.push(res);
+    } else {
+      this.shortReplyExamples.push(res);
+    }
+
+    return { id: res.id, character_count: res.character_count };
+  }
+
+  async getReplyExamples(comment: string): Promise<ReplyExample[]> {
+    const commentLength = comment.length >= 25 ? 'long' : 'short';
+    if (commentLength === 'long' && this.longReplyExamples?.length > 0) {
+      return this.longReplyExamples;
+    } else if (
+      commentLength === 'short' &&
+      this.shortReplyExamples?.length > 0
+    ) {
+      return this.shortReplyExamples;
+    } else {
+      const examples = await this.prismaService.replyExample.findMany({
+        where: {
+          character_count:
+            commentLength === 'long'
+              ? {
+                  gte: 25,
+                }
+              : {
+                  lt: 25,
+                },
+        },
+      });
+      if (commentLength === 'long') {
+        this.longReplyExamples = examples;
+      } else {
+        this.shortReplyExamples = examples;
+      }
+      return examples;
+    }
   }
 
   async initializeVectorStore(comment: string): Promise<MemoryVectorStore> {
     const vectorStore = new MemoryVectorStore(this.embeddings);
-    const examples = await this.prismaService.replyExamples.findMany({
-      where: {
-        character_count:
-          comment.length >= 25
-            ? {
-                gte: 25,
-              }
-            : {
-                lt: 25,
-              },
-      },
-      take: DB_TAKE_LIMIT,
-    });
+    const examples = await this.getReplyExamples(comment);
     await vectorStore.addVectors(
       examples.map((example) => example.embedding),
       examples.map(

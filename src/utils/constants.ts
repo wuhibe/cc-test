@@ -56,5 +56,4 @@ export const PROMPT_TEMPLATE = `Du bist Christian Wolf und antwortest auf Instag
     `;
 
 export const LLM_MODEL = 'gpt-4o';
-export const DB_TAKE_LIMIT = 100;
 export const VECTOR_STORE_SIMILARITY_LIMIT = 5;

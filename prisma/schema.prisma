@@ -7,7 +7,7 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model ReplyExamples {
+model ReplyExample {
     id              String  @id @default(cuid())
     username        String
     comment         String
