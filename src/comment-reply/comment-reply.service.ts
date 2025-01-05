@@ -42,8 +42,10 @@ export class CommentReplyService {
         };
       }
     } else {
-      const response =
-        await this.llmHandlerService.chatCompletion(comment_text);
+      const response = await this.llmHandlerService.complexChatCompletion(
+        username,
+        comment_text,
+      );
       return {
         proposed_response: response,
       };

@@ -1,11 +1,14 @@
 import { Document } from '@langchain/core/documents';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
+import {
+  ChatPromptTemplate,
+  FewShotChatMessagePromptTemplate,
+} from '@langchain/core/prompts';
 import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
+import { PROMPT_TEMPLATE } from 'src/utils/constants';
 import { PrismaService } from '../prisma/prisma.service';
-import { PROMPT_TEMPLATE } from '../utils/constants';
 
 @Injectable()
 export class LlmHandlerService {
@@ -38,11 +41,10 @@ export class LlmHandlerService {
         character_count: true,
       },
     });
-    console.log('New reply example added.');
     return res;
   }
 
-  async getVectorStore(comment: string): Promise<MemoryVectorStore> {
+  async initializeVectorStore(comment: string): Promise<MemoryVectorStore> {
     const vectorStore = new MemoryVectorStore(this.embeddings);
     const examples = await this.prismaService.replyExamples.findMany({
       where: {
@@ -75,32 +77,40 @@ export class LlmHandlerService {
     return vectorStore;
   }
 
-  async chatCompletion(comment: string): Promise<string> {
-    const vectorStore = await this.getVectorStore(comment);
+  async complexChatCompletion(
+    username: string,
+    comment: string,
+  ): Promise<string> {
+    const message = `@${username}: ${comment}`;
+    const vectorStore = await this.initializeVectorStore(comment);
 
     const examples = [];
     const documents = await vectorStore.similaritySearch(comment, 5);
-    const selectedExamples = documents.map((doc) => ({
-      username: doc.metadata.username,
-      comment: doc.metadata.comment,
-      reply: doc.metadata.reply,
-      character_count: doc.metadata.character_count,
-    }));
-    selectedExamples.forEach((example) => {
-      const { username, comment, reply } = example;
-      examples.push(['user', `@${username}: ${comment}`]);
-      examples.push(['ai', reply]);
+    documents.forEach((doc) => {
+      const { username, comment, reply } = doc.metadata;
+      examples.push({ input: `@${username}: ${comment}`, output: reply });
     });
 
-    const promptTemplate = ChatPromptTemplate.fromMessages([
-      ['system', PROMPT_TEMPLATE],
-      ...examples,
-      ['user', `{input}`],
+    const examplePrompt = ChatPromptTemplate.fromMessages([
+      ['user', '{input}'],
+      ['ai', '{output}'],
     ]);
-    const parser = new StringOutputParser();
-    const chain = promptTemplate.pipe(this.llm).pipe(parser);
+    const fewShotPrompt = new FewShotChatMessagePromptTemplate({
+      examplePrompt,
+      examples,
+      inputVariables: [],
+    });
+    const finalPrompt = ChatPromptTemplate.fromMessages([
+      ['system', PROMPT_TEMPLATE],
+      ...(await fewShotPrompt.formatMessages({})),
+      ['human', '{input}'],
+    ]);
+    const promptTemplate = await finalPrompt.format({ input: message });
+    console.log({ promptTemplate });
 
-    const response = await chain.invoke({ input: comment });
+    const parser = new StringOutputParser();
+    const chain = finalPrompt.pipe(this.llm).pipe(parser);
+    const response = await chain.invoke({ input: message });
 
     return response;
   }

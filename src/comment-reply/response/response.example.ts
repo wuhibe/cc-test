@@ -3,5 +3,6 @@ export const proposeReplyResponse = {
 };
 
 export const addExampleResponse = {
-  message: 'Example comment and reply added',
+  id: 'cm5jj8xhn000b64g5i9xvm0l9',
+  character_count: 17,
 };
