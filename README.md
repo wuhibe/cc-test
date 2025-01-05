@@ -1,73 +1,115 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Coaching Central API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A NestJS-based API service that provides AI-powered comment reply suggestions and manages reply examples. The service uses OpenAI for generating contextual responses and includes vector similarity search for finding relevant reply examples.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- AI-powered comment reply suggestions
+- Vector similarity search for finding relevant examples
+- Example management system
+- Swagger API documentation
+- PostgreSQL database integration with Prisma ORM
+- Input validation and sanitization
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Prerequisites
+
+- Node.js (v16 or higher)
+- PostgreSQL database
+- OpenAI API key
 
 ## Installation
 
+1. Clone the repository:
+
 ```bash
-$ npm install
+git clone https://github.com/wuhibe/cc-test
+cd cc-test
 ```
 
-## Running the app
+2. Install dependencies:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Test
+3. Set up environment variables:
+Create a `.env` file in the root directory with the following variables:
 
 ```bash
-# unit tests
-$ npm run test
+DATABASE_URL="postgresql://user:password@localhost:5432/your_database"
+OPENAI_API_KEY="your-openai-api-key"
+PORT=3000
+```
 
+4. Initialize the database:
+
+```bash
+npx prisma migrate dev
+```
+
+## Running the Project
+
+### Development Mode
+
+```bash
+# Watch mode
+npm run start:dev
+
+# Debug mode
+npm run start:debug
+```
+
+### Production Mode
+
+```bash
+# Build the project
+npm run build
+
+# Start production server
+npm run start:prod
+```
+
+### Testing
+
+```bash
 # e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run test:e2e
 ```
 
-## Support
+## API Documentation
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Once the application is running, you can access the Swagger API documentation at:
 
-## Stay in touch
+```
+http://localhost:3000/api
+```
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Database Schema
 
-## License
+The project uses a PostgreSQL database with the following main table:
 
-Nest is [MIT licensed](LICENSE).
+- `reply_examples`: Stores example comments and replies with vector embeddings
+
+## Next Steps
+
+1. **Authentication & Authorization**
+   - Implement JWT authentication
+   - Add role-based access control
+
+2. **Rate Limiting**
+   - Add rate limiting for API endpoints
+   - Implement request throttling
+
+3. **Caching**
+   - Add Redis caching for frequently accessed data
+   - Implement response caching
+
+4. **Monitoring & Logging**
+   - Set up application monitoring
+   - Implement structured logging
+   - Add error tracking
+
+5. **Testing**
+   - Increase test coverage
+   - Add integration tests
+   - Implement load testing
